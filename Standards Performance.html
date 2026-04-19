@@ -1,0 +1,1100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Standards performance — Newsela</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800&family=Mulish:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700;800&family=Noto+Serif:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; padding: 0; background: white; }
+  body {
+    font-family: var(--sp-font, "Nunito"), "Circular", "Helvetica Neue", -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+    color: rgb(29,29,29);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  button, input, select, table { font-family: inherit; }
+  @keyframes spSlide {
+    from { transform: translateX(40px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-thumb { background: rgb(200,202,206); border-radius: 8px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgb(168,170,176); }
+  ::-webkit-scrollbar-track { background: transparent; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- data.js -->
+<script>
+window.SP_DATA = (() => {
+  const SCHOOLS = [
+    "Brooksville K-12 School",
+    "Westgate Middle School",
+    "Northview High School",
+    "Oakridge Elementary",
+    "Riverbend Academy",
+    "All schools (district)",
+  ];
+
+  const GRADE_BANDS = [
+    "All Grade bands (TBD)",
+    "Elementary (K-5)",
+    "Middle School (6-8)",
+    "High School (9-12)",
+  ];
+
+  const STANDARD_GRADES = [
+    "All Standard Grades",
+    "Grade 6",
+    "Grade 7",
+    "Grade 8",
+    "Grade 9-10",
+    "Grade 11-12",
+  ];
+
+  const DATE_RANGES = [
+    "Aug to date",
+    "Last 30 days",
+    "Last 90 days",
+    "This semester",
+    "This school year",
+    "Custom range\u2026",
+  ];
+
+  const TOPIC_NAMES = [
+    "Compare and Contrast", "Cause and Effect", "Cite Textual Evidence",
+    "Author's Argument", "Sound Devices", "Evaluating Texts", "Fluent Reading",
+    "Main Idea", "Summarizing", "Inference", "Point of View",
+    "Text Structure", "Word Choice", "Figurative Language", "Theme",
+    "Character Development", "Plot Analysis", "Setting Analysis",
+    "Mood and Tone", "Symbolism", "Allusion", "Imagery",
+    "Argument Analysis", "Rhetorical Devices", "Logical Fallacies",
+    "Claim and Counterclaim", "Evidence Evaluation", "Source Credibility",
+    "Synthesizing Sources", "Research Skills", "Annotation",
+    "Vocabulary in Context", "Multiple Meaning Words", "Word Roots",
+    "Prefixes and Suffixes", "Greek and Latin Roots", "Context Clues",
+    "Denotation and Connotation", "Connotative Meaning", "Tone Words",
+    "Sentence Structure", "Paragraph Structure", "Transitions",
+    "Coherence", "Narrative Pacing", "Dialogue Analysis",
+    "Point of View Shifts", "Unreliable Narrator", "Foreshadowing",
+    "Flashback", "Irony", "Satire", "Parody",
+    "Genre Conventions", "Historical Context", "Cultural Context",
+    "Author's Background", "Reader Response", "Critical Lens",
+    "Compare Across Texts", "Intertextuality", "Adaptation Analysis",
+    "Visual Literacy", "Media Analysis", "Digital Sources",
+    "Primary vs Secondary", "Bias Detection", "Fact vs Opinion",
+    "Inference from Data", "Graphic Interpretation", "Diagram Reading",
+    "Map Reading", "Timeline Analysis", "Cause-Effect Chains",
+    "Sequence of Events", "Problem-Solution", "Compare-Contrast Essays",
+    "Persuasive Techniques", "Hyperbole",
+  ];
+
+  const GRADE_LABELS = ["High School", "Middle School", "Elementary"];
+
+  function seedRand(i) {
+    const x = Math.sin(i * 9301 + 49297) * 233280;
+    return x - Math.floor(x);
+  }
+
+  const TOPICS = TOPIC_NAMES.map((name, i) => {
+    const r = seedRand(i + 1);
+    let pct;
+    if (i < 4) pct = 91 - i * 10;
+    else if (i >= 5 && i <= 7) pct = 17 + (i - 5) * 8;
+    else pct = Math.round(35 + r * 50);
+    const grade = GRADE_LABELS[Math.floor(seedRand(i + 100) * 3)];
+    return {
+      id: `topic-${i}`,
+      name,
+      gradeBand: grade,
+      pct: Math.max(8, Math.min(99, pct)),
+      questions: 60 + Math.floor(seedRand(i + 50) * 220),
+      newselaAvg: 70 + Math.floor(seedRand(i + 200) * 18),
+    };
+  });
+
+  const STANDARDS = [
+    "RI.7.1", "RI.7.2", "RI.7.3", "RI.7.4", "RI.7.5", "RI.7.6", "RI.7.8", "RI.7.9",
+    "RI.8.1", "RI.8.2", "RI.8.3", "RI.8.4", "RI.8.5", "RI.8.6", "RI.8.8", "RI.8.9",
+    "RI.9-10.1", "RI.9-10.2", "RI.9-10.3", "RI.9-10.4", "RI.9-10.5", "RI.9-10.6",
+    "RI.9-10.7", "RI.9-10.8", "RI.9-10.9",
+    "RI.11-12.1", "RI.11-12.2", "RI.11-12.3", "RI.11-12.4", "RI.11-12.5",
+    "RI.11-12.6", "RI.11-12.7",
+  ];
+
+  const STANDARD_DESCRIPTIONS = {
+    "RI.7.1": "Cite several pieces of textual evidence to support analysis.",
+    "RI.7.2": "Determine two or more central ideas in a text.",
+    "RI.8.1": "Cite the textual evidence that most strongly supports an analysis.",
+    "RI.9-10.1": "Cite strong and thorough textual evidence to support analysis.",
+    "RI.9-10.2": "Determine a central idea of a text and analyze its development.",
+    "RI.9-10.5": "Analyze in detail how an author's ideas are developed and refined.",
+    "RI.9-10.6": "Determine an author's point of view or purpose.",
+    "RI.9-10.7": "Analyze various accounts of a subject in different mediums.",
+    "RI.9-10.8": "Delineate and evaluate the argument and specific claims.",
+    "RI.9-10.9": "Analyze seminal U.S. documents of historical significance.",
+  };
+
+  const TEACHER_NAMES = [
+    "Benson, Amy", "Clavicle, Brian", "Denver, Evan", "Faith, Gail",
+    "Hill, Ira", "Jacob, Kira", "Lee, Marcus", "Nguyen, Olivia",
+    "Patel, Quincy", "Romero, Sasha", "Tanaka, Uma", "Vasquez, Wren",
+    "Xu, Yara", "Zimmer, Aiden", "Brooks, Bailey", "Carter, Cameron",
+    "Diaz, Devon", "Ellis, Erin", "Foster, Finley", "Garza, Gray",
+    "Hayes, Harper", "Ito, Indigo", "Jordan, Justice", "Khan, Kai",
+    "Lopez, Lior", "Murphy, Morgan", "Novak, Noor", "Owens, Ocean",
+    "Park, Parker", "Quinn, Riley", "Reed, Rowan", "Sato, Sage",
+  ];
+
+  function teacherScore(ti, si) {
+    const r = seedRand(ti * 100 + si + 1);
+    if (r < 0.06) return null;
+    const skill = 0.35 + seedRand(ti + 17) * 0.55;
+    const variance = (seedRand(ti * 7 + si) - 0.5) * 0.35;
+    const pct = Math.max(8, Math.min(99, Math.round((skill + variance) * 100)));
+    const questions = 2 + Math.floor(seedRand(ti * 13 + si) * 9);
+    return { pct, questions };
+  }
+
+  const TEACHERS = TEACHER_NAMES.map((name, ti) => {
+    const scores = {};
+    STANDARDS.forEach((s, si) => { scores[s] = teacherScore(ti, si); });
+    const valid = Object.values(scores).filter(s => s);
+    const avg = Math.round(valid.reduce((a, b) => a + b.pct, 0) / valid.length);
+    return {
+      id: `teacher-${ti}`,
+      name,
+      scores,
+      avg,
+      classes: 2 + Math.floor(seedRand(ti + 5) * 4),
+      students: 60 + Math.floor(seedRand(ti + 9) * 80),
+    };
+  });
+
+  const STUDENT_FIRST = ["Aiden", "Bella", "Carlos", "Diana", "Eli", "Fiona", "Gabriel", "Hana", "Isaac", "Jade", "Kai", "Luna", "Mateo", "Nia", "Omar", "Priya", "Quinn", "Riya", "Sebastian", "Tess"];
+  const STUDENT_LAST = ["Adams", "Brown", "Chen", "Davis", "Evans", "Flores", "Garcia", "Hayes", "Ivanov", "Johnson", "Kim", "Lopez", "Martinez", "Nguyen", "O'Brien", "Patel", "Quintero", "Reyes", "Singh", "Taylor"];
+
+  function generateStudents(teacher) {
+    const n = 18 + Math.floor(seedRand(teacher.id.length + 3) * 8);
+    return Array.from({ length: n }, (_, i) => {
+      const f = STUDENT_FIRST[(i * 3 + 1) % STUDENT_FIRST.length];
+      const l = STUDENT_LAST[(i * 7 + 2) % STUDENT_LAST.length];
+      const scores = {};
+      STANDARDS.forEach((s, si) => {
+        const r = seedRand(i * 31 + si + teacher.id.length);
+        if (r < 0.1) scores[s] = null;
+        else {
+          const tScore = teacher.scores[s];
+          const base = tScore ? tScore.pct : 60;
+          const v = (seedRand(i * 11 + si + 3) - 0.5) * 30;
+          scores[s] = { pct: Math.max(0, Math.min(100, Math.round(base + v))), questions: 1 + Math.floor(seedRand(i + si) * 8) };
+        }
+      });
+      const valid = Object.values(scores).filter(s => s);
+      const avg = valid.length ? Math.round(valid.reduce((a, b) => a + b.pct, 0) / valid.length) : 0;
+      return { id: `student-${teacher.id}-${i}`, name: `${l}, ${f}`, scores, avg };
+    });
+  }
+
+  return {
+    SCHOOLS, GRADE_BANDS, STANDARD_GRADES, DATE_RANGES,
+    TOPICS, STANDARDS, STANDARD_DESCRIPTIONS, TEACHERS,
+    generateStudents,
+  };
+})();
+</script>
+
+<!-- atoms.jsx -->
+<script type="text/babel">
+const SP_BLUE = "rgb(8,44,136)";
+const SP_LINK = "rgb(16,111,243)";
+const SP_TEXT = "rgb(29,29,29)";
+const SP_TEXT2 = "rgb(51,51,51)";
+const SP_MUTED = "rgb(91,90,97)";
+const SP_GREY = "rgb(118,118,118)";
+const SP_BG = "rgb(248,248,248)";
+const SP_PANEL = "rgb(240,241,242)";
+const SP_BORDER = "rgb(221,221,221)";
+const SP_BORDER_LT = "rgb(225,227,229)";
+const SP_CYAN = "rgb(100,212,243)";
+const SP_NAV_TEXT = "rgb(84,84,84)";
+
+const Icon = ({ d, size = 16, stroke = "currentColor", strokeWidth = 1.5, fill = "none", style = {}, viewBox = "0 0 24 24" }) => (
+  <svg width={size} height={size} viewBox={viewBox} fill={fill} stroke={stroke} strokeWidth={strokeWidth}
+    strokeLinecap="round" strokeLinejoin="round" style={{ display: "block", flexShrink: 0, ...style }}>
+    <path d={d} />
+  </svg>
+);
+
+const Icons = {
+  ChevronDown: (p) => <Icon {...p} d="M6 9l6 6 6-6" />,
+  ChevronUp: (p) => <Icon {...p} d="M6 15l6-6 6 6" />,
+  ChevronRight: (p) => <Icon {...p} d="M9 6l6 6-6 6" />,
+  ChevronLeft: (p) => <Icon {...p} d="M15 6l-9 6 9 6" />,
+  ChevronDoubleRight: (p) => <Icon {...p} d="M7 6l6 6-6 6 M13 6l6 6-6 6" />,
+  ChevronDoubleLeft: (p) => <Icon {...p} d="M11 6l-6 6 6 6 M17 6l-6 6 6 6" />,
+  Search: (p) => <Icon {...p} d="M11 4a7 7 0 100 14 7 7 0 000-14zM21 21l-5-5" />,
+  Slash: (p) => <Icon {...p} d="M16 4l-8 16" />,
+  Download: (p) => <Icon {...p} d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2" />,
+  Close: (p) => <Icon {...p} d="M6 6l12 12M18 6L6 18" />,
+  Info: (p) => <Icon {...p} d="M12 3a9 9 0 100 18 9 9 0 000-18zm0 5v.01M12 11v6" />,
+  Sort: (p) => <Icon {...p} d="M7 4l3 4H4l3-4zm0 16l-3-4h6l-3 4z" fill="currentColor" stroke="none" />,
+  External: (p) => <Icon {...p} d="M14 4h6v6M20 4l-8 8M9 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-3" />,
+  User: (p) => <Icon {...p} d="M12 12a4 4 0 100-8 4 4 0 000 8zm-7 9a7 7 0 0114 0" />,
+  Sliders: (p) => <Icon {...p} d="M4 6h10M18 6h2M4 12h2M10 12h10M4 18h14M18 18h2M14 4v4M8 10v4M16 16v4" />,
+};
+
+function scoreColor(pct) {
+  if (pct == null) return SP_TEXT;
+  if (pct >= 90) return SP_BLUE;
+  return SP_TEXT;
+}
+
+function PercentCircle({ pct, size = 68, stroke = 8, color }) {
+  const c = color || SP_CYAN;
+  const r = (size - stroke) / 2;
+  const C = 2 * Math.PI * r;
+  const dash = pct == null ? 0 : (pct / 100) * C;
+  return (
+    <div style={{ position: "relative", width: size, height: size, flexShrink: 0 }}>
+      <svg width={size} height={size} style={{ display: "block", transform: "rotate(-90deg)" }}>
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={SP_BORDER_LT} strokeWidth={stroke} />
+        {pct != null && (
+          <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={c} strokeWidth={stroke}
+            strokeLinecap="round" strokeDasharray={`${dash} ${C - dash}`} />
+        )}
+      </svg>
+      <div style={{
+        position: "absolute", inset: 0, display: "flex", alignItems: "center", justifyContent: "center",
+        fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: size > 50 ? 20 : 14, color: SP_TEXT,
+      }}>
+        {pct == null ? "—" : `${pct}%`}
+      </div>
+    </div>
+  );
+}
+
+function NewselaLogo() {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+      <svg width={28} height={28} viewBox="0 0 32 32" style={{ display: "block" }}>
+        <rect width="32" height="32" fill={SP_LINK} />
+        <path fill="white" fillRule="evenodd" d="M 15.145 26.95 L 5.023 26.95 L 5.023 5.023 L 15.145 5.023 L 15.145 26.95 Z M 26.976 26.974 L 16.83 26.974 L 16.83 5.047 L 21.928 5.047 C 24.708 5.047 26.976 7.315 26.976 10.096 L 26.976 26.974 Z" />
+      </svg>
+      <span style={{ fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 20, color: SP_LINK, letterSpacing: -0.2 }}>
+        newsela
+      </span>
+    </div>
+  );
+}
+
+Object.assign(window, {
+  SP_BLUE, SP_LINK, SP_TEXT, SP_TEXT2, SP_MUTED, SP_GREY,
+  SP_BG, SP_PANEL, SP_BORDER, SP_BORDER_LT, SP_CYAN, SP_NAV_TEXT,
+  Icon, Icons, scoreColor, PercentCircle, NewselaLogo,
+});
+</script>
+
+<!-- chrome.jsx -->
+<script type="text/babel">
+const NavItem = ({ children, hasChevron, onClick, hasIcon }) => (
+  <div onClick={onClick} style={{
+    display: "flex", alignItems: "center", gap: 6, height: 24,
+    fontFamily: "Circular, sans-serif", fontSize: 16, color: SP_NAV_TEXT, cursor: "pointer",
+  }}>
+    {hasIcon && <Icons.Search size={16} stroke={SP_NAV_TEXT} />}
+    <span>{children}</span>
+    {hasChevron && <Icons.ChevronDown size={16} stroke={SP_NAV_TEXT} />}
+  </div>
+);
+
+function TopNav() {
+  return (
+    <div style={{
+      height: 64, background: "white", borderBottom: `1px solid ${SP_BORDER}`,
+      display: "flex", alignItems: "center", padding: "0 40px", justifyContent: "space-between",
+      position: "sticky", top: 0, zIndex: 50,
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 32 }}>
+        <NewselaLogo />
+        <NavItem hasIcon>Search</NavItem>
+        <NavItem hasChevron>Browse</NavItem>
+        <NavItem hasChevron>Your Content</NavItem>
+        <NavItem>Assignments</NavItem>
+        <NavItem hasChevron>Reports</NavItem>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+        <span style={{ fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_NAV_TEXT }}>Educator Center</span>
+        <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: "50%", background: SP_BORDER,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 11, color: SP_NAV_TEXT, letterSpacing: 0.5,
+          }}>DG</div>
+          <Icons.ChevronDown size={16} stroke={SP_NAV_TEXT} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SidebarLink({ label, active, indent, onClick }) {
+  return (
+    <div onClick={onClick} style={{
+      position: "relative",
+      display: "flex", alignItems: "center", height: 32,
+      paddingLeft: indent ? 28 : 0, cursor: "pointer",
+      borderRadius: "2px 8px 8px 2px",
+      background: active ? "white" : "transparent",
+      marginRight: -8, paddingRight: 12,
+    }}>
+      {active && <div style={{
+        position: "absolute", left: -16, top: 4, bottom: 4, width: 4, borderRadius: 2, background: "rgb(4,51,122)",
+      }} />}
+      <span style={{
+        fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_TEXT2,
+        fontWeight: active ? 700 : 400,
+      }}>{label}</span>
+    </div>
+  );
+}
+
+function Sidebar() {
+  return (
+    <aside style={{
+      width: 231, background: SP_BG, padding: "32px 24px", flexShrink: 0,
+      borderRight: `1px solid ${SP_BORDER_LT}`, alignSelf: "stretch",
+    }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+        <div style={{
+          fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 12,
+          letterSpacing: 1, color: SP_GREY, textTransform: "uppercase", marginBottom: 4,
+        }}>Reports</div>
+        <SidebarLink label="Usage report" />
+        <SidebarLink label="Standards performance" active />
+        <SidebarLink label="Power words" />
+        <SidebarLink label="Power words by class" indent />
+      </div>
+    </aside>
+  );
+}
+
+function Breadcrumb() {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 16 }}>
+      <span style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_GREY, textDecoration: "underline", cursor: "pointer" }}>Reports</span>
+      <Icons.Slash size={12} stroke={SP_GREY} />
+      <span style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_TEXT }}>Standards performance</span>
+    </div>
+  );
+}
+
+Object.assign(window, { TopNav, Sidebar, Breadcrumb });
+</script>
+
+<!-- combobox.jsx -->
+<script type="text/babel">
+const { useState, useRef, useEffect } = React;
+
+function useClickOutside(ref, onClose) {
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) onClose(); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, [ref, onClose]);
+}
+
+function ComboBox({ label, value, options, onChange, width }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef(null);
+  useClickOutside(ref, () => setOpen(false));
+  return (
+    <div style={{ width: width || "100%", position: "relative" }} ref={ref}>
+      <div style={{
+        fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_TEXT, marginBottom: 6, fontWeight: 500,
+      }}>{label}</div>
+      <button onClick={() => setOpen(o => !o)} style={{
+        width: "100%", height: 48, background: "white", border: `1px solid ${open ? SP_LINK : SP_BORDER}`,
+        borderRadius: 4, padding: "0 12px 0 16px", display: "flex", alignItems: "center", justifyContent: "space-between",
+        cursor: "pointer", fontFamily: "Circular, sans-serif", fontSize: 16, color: SP_TEXT, textAlign: "left",
+        outline: "none", boxShadow: open ? `0 0 0 2px rgba(16,111,243,0.18)` : "none",
+      }}>
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{value}</span>
+        <Icons.ChevronDown size={20} stroke={SP_TEXT} style={{ transition: "transform 0.15s", transform: open ? "rotate(180deg)" : "none" }} />
+      </button>
+      {open && (
+        <div style={{
+          position: "absolute", left: 0, right: 0, top: "100%", marginTop: 4, background: "white",
+          border: `1px solid ${SP_BORDER}`, borderRadius: 4, boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
+          zIndex: 30, maxHeight: 320, overflowY: "auto", padding: "4px 0",
+        }}>
+          {options.map(opt => (
+            <div key={opt} onClick={() => { onChange(opt); setOpen(false); }} style={{
+              padding: "10px 16px", fontFamily: "Circular, sans-serif", fontSize: 14,
+              color: SP_TEXT, cursor: "pointer", background: opt === value ? "rgb(231,241,255)" : "transparent",
+              fontWeight: opt === value ? 700 : 400,
+            }}
+              onMouseEnter={e => { if (opt !== value) e.currentTarget.style.background = SP_BG; }}
+              onMouseLeave={e => { if (opt !== value) e.currentTarget.style.background = "transparent"; }}
+            >{opt}</div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+Object.assign(window, { ComboBox, useClickOutside });
+</script>
+
+<!-- topics.jsx -->
+<script type="text/babel">
+function TopicCard({ topic, showAvg }) {
+  return (
+    <div style={{
+      background: "white", borderRadius: 12, padding: 16,
+      display: "flex", flexDirection: "column", gap: 10,
+      minHeight: 160, flex: "1 1 0", minWidth: 0,
+    }}>
+      <div style={{ display: "flex", flexDirection: "column" }}>
+        <div style={{ fontFamily: "Circular, sans-serif", fontSize: 13, color: SP_MUTED, marginBottom: 2 }}>
+          {topic.gradeBand || "\u00a0"}
+        </div>
+        <div style={{
+          fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 16, color: SP_TEXT,
+          textAlign: "left",
+        }}>{topic.name}</div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 14, marginTop: "auto" }}>
+        <PercentCircle pct={topic.pct} />
+        <div style={{ display: "flex", flexDirection: "column", gap: 2, minWidth: 0 }}>
+          <div style={{ fontFamily: "Circular, sans-serif", fontSize: 13, color: SP_TEXT }}>
+            Based on {topic.questions} Questions
+          </div>
+          {showAvg && (
+            <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED }}>
+              Newsela average: {topic.newselaAvg}%
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function CollapsiblePanel({ title, count, defaultOpen, children, onToggle, isOpen, controlled }) {
+  const [openInternal, setOpenInternal] = useState(defaultOpen);
+  const open = controlled ? isOpen : openInternal;
+  const toggle = () => { if (controlled) onToggle?.(); else setOpenInternal(o => !o); };
+  return (
+    <div style={{ background: SP_PANEL, borderRadius: 16, padding: 16 }}>
+      <button onClick={toggle} style={{
+        width: "100%", background: "none", border: "none", padding: 0, cursor: "pointer",
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+      }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 8 }}>
+          <span style={{ fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 20, color: SP_TEXT }}>
+            {title}
+          </span>
+          {count != null && (
+            <span style={{ fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_MUTED }}>
+              {count}
+            </span>
+          )}
+        </div>
+        <div style={{
+          width: 32, height: 32, borderRadius: 16, display: "flex", alignItems: "center", justifyContent: "center",
+        }}>
+          {open ? <Icons.ChevronUp size={20} stroke={SP_TEXT} /> : <Icons.ChevronDown size={20} stroke={SP_TEXT} />}
+        </div>
+      </button>
+      {open && <div style={{ marginTop: 16 }}>{children}</div>}
+    </div>
+  );
+}
+
+function TopicGrid({ topics }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 16, alignItems: "stretch" }}>
+      {topics.map(t => <TopicCard key={t.id} topic={t} showAvg />)}
+    </div>
+  );
+}
+
+function AllTopicsList({ topics }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
+      {topics.map(t => (
+        <div key={t.id} style={{
+          background: "white", borderRadius: 8, padding: "10px 14px",
+          display: "flex", alignItems: "center", gap: 16,
+        }}>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 14, color: SP_TEXT,
+              overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+            }}>{t.name}</div>
+            <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED }}>
+              {t.questions} questions · Newsela avg {t.newselaAvg}%
+            </div>
+          </div>
+          <div style={{ width: 120, height: 8, background: SP_BORDER_LT, borderRadius: 4, overflow: "hidden", flexShrink: 0 }}>
+            <div style={{ width: `${t.pct}%`, height: "100%", background: SP_CYAN, borderRadius: 4 }} />
+          </div>
+          <div style={{
+            fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 14, color: SP_TEXT,
+            width: 38, textAlign: "right",
+          }}>{t.pct}%</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+Object.assign(window, { TopicCard, CollapsiblePanel, TopicGrid, AllTopicsList });
+</script>
+
+<!-- table.jsx -->
+<script type="text/babel">
+function ScoreCell({ score, mode }) {
+  if (!score) {
+    return (
+      <div style={{ width: 140, display: "flex", flexDirection: "column", gap: 4 }}>
+        <div style={{ fontFamily: "Circular, sans-serif", fontSize: 16, color: SP_TEXT }}>NA</div>
+        <div style={{ height: 8, borderRadius: 4, border: `1px dashed ${SP_TEXT}`, background: "white" }} />
+        <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED }}>0 questions</div>
+      </div>
+    );
+  }
+  const c = scoreColor(score.pct);
+  if (mode === "circle") {
+    return (
+      <div style={{ width: 140, display: "flex", alignItems: "center", gap: 10 }}>
+        <PercentCircle pct={score.pct} size={44} stroke={5} />
+        <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED }}>{score.questions} q</div>
+      </div>
+    );
+  }
+  return (
+    <div style={{ width: 140, display: "flex", flexDirection: "column", gap: 4 }}>
+      <div style={{ fontFamily: "Circular, sans-serif", fontSize: 16, color: SP_TEXT }}>{score.pct}%</div>
+      <div style={{ height: 8, borderRadius: 4, background: "white", border: `1px solid ${c}`, overflow: "hidden" }}>
+        <div style={{ width: `${score.pct}%`, height: "100%", background: c, borderRadius: 4 }} />
+      </div>
+      <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED }}>{score.questions} questions</div>
+    </div>
+  );
+}
+
+function SortableHeader({ label, active, dir, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      display: "flex", alignItems: "center", gap: 6, background: "none", border: "none",
+      padding: 0, cursor: "pointer", height: 24,
+      fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 16, color: SP_TEXT,
+    }}>
+      <span>{label}</span>
+      <span style={{ display: "flex", flexDirection: "column", gap: 1, opacity: active ? 1 : 0.45 }}>
+        <Icons.ChevronUp size={8} stroke={active && dir === "asc" ? SP_LINK : SP_TEXT} strokeWidth={3} />
+        <Icons.ChevronDown size={8} stroke={active && dir === "desc" ? SP_LINK : SP_TEXT} strokeWidth={3} />
+      </span>
+    </button>
+  );
+}
+
+function TeacherTable({ teachers, standards, mode, sortKey, sortDir, onSort, onRowClick, page, pageSize, onPageChange, totalRows, selectedTeacherId }) {
+  const start = page * pageSize;
+  const visible = teachers.slice(start, start + pageSize);
+  const totalPages = Math.max(1, Math.ceil(totalRows / pageSize));
+
+  return (
+    <div style={{
+      background: "white", border: `1px solid ${SP_BORDER}`, borderRadius: 8,
+      overflow: "hidden", display: "flex", flexDirection: "column",
+    }}>
+      <div style={{ overflowX: "auto", maxHeight: 560, position: "relative" }}>
+        <table style={{ borderCollapse: "collapse", width: "max-content", minWidth: "100%" }}>
+          <thead>
+            <tr>
+              <th style={{
+                position: "sticky", top: 0, left: 0, zIndex: 3, background: "white",
+                padding: "16px 20px", textAlign: "left", borderBottom: `1px solid ${SP_BORDER_LT}`,
+                minWidth: 200, boxShadow: "2px 0 0 0 rgba(0,0,0,0.04)",
+              }}>
+                <SortableHeader label="Teacher" active={sortKey === "name"} dir={sortDir} onClick={() => onSort("name")} />
+              </th>
+              {standards.map(s => (
+                <th key={s} style={{
+                  position: "sticky", top: 0, zIndex: 2, background: "white",
+                  padding: "16px 20px", textAlign: "left", borderBottom: `1px solid ${SP_BORDER_LT}`,
+                  minWidth: 160,
+                }}>
+                  <SortableHeader label={s} active={sortKey === s} dir={sortDir} onClick={() => onSort(s)} />
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {visible.map((t, i) => {
+              const sel = t.id === selectedTeacherId;
+              return (
+                <tr key={t.id} onClick={() => onRowClick(t)}
+                  style={{ cursor: "pointer", background: sel ? "rgb(231,241,255)" : (i % 2 === 0 ? "rgb(248,248,248)" : "white") }}
+                  onMouseEnter={e => { if (!sel) e.currentTarget.style.background = "rgb(240,247,255)"; }}
+                  onMouseLeave={e => { if (!sel) e.currentTarget.style.background = i % 2 === 0 ? "rgb(248,248,248)" : "white"; }}
+                >
+                  <td style={{
+                    position: "sticky", left: 0, zIndex: 1, background: "inherit",
+                    padding: "12px 20px", borderBottom: `1px solid ${SP_BORDER_LT}`,
+                    boxShadow: "2px 0 0 0 rgba(0,0,0,0.04)",
+                  }}>
+                    <span style={{ fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_LINK, textDecoration: "underline" }}>{t.name}</span>
+                    <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED, marginTop: 2 }}>
+                      {t.classes} classes · {t.students} students
+                    </div>
+                  </td>
+                  {standards.map(s => (
+                    <td key={s} style={{ padding: "12px 20px", borderBottom: `1px solid ${SP_BORDER_LT}` }}>
+                      <ScoreCell score={t.scores[s]} mode={mode} />
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+      <div style={{
+        display: "flex", justifyContent: "space-between", alignItems: "center",
+        padding: "12px 20px", borderTop: `1px solid ${SP_BORDER_LT}`, background: "white",
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <span style={{ fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_TEXT }}>Show student rows</span>
+          <select value={pageSize} onChange={e => onPageChange(0, +e.target.value)} style={{
+            border: `1px solid ${SP_BORDER}`, borderRadius: 4, padding: "4px 8px",
+            fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_TEXT,
+          }}>
+            {[10, 25, 50, 100].map(n => <option key={n} value={n}>{n}</option>)}
+          </select>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <span style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_TEXT }}>
+            {start + 1} – {Math.min(start + pageSize, totalRows)} of {totalRows}
+          </span>
+          <div style={{ display: "flex", gap: 4 }}>
+            <button disabled={page === 0} onClick={() => onPageChange(0, pageSize)} style={pgBtn(page === 0)}><Icons.ChevronDoubleLeft size={14} /></button>
+            <button disabled={page === 0} onClick={() => onPageChange(page - 1, pageSize)} style={pgBtn(page === 0)}><Icons.ChevronLeft size={14} /></button>
+            <button disabled={page >= totalPages - 1} onClick={() => onPageChange(page + 1, pageSize)} style={pgBtn(page >= totalPages - 1)}><Icons.ChevronRight size={14} /></button>
+            <button disabled={page >= totalPages - 1} onClick={() => onPageChange(totalPages - 1, pageSize)} style={pgBtn(page >= totalPages - 1)}><Icons.ChevronDoubleRight size={14} /></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const pgBtn = (disabled) => ({
+  width: 28, height: 28, border: "none", background: "transparent",
+  borderRadius: 4, cursor: disabled ? "not-allowed" : "pointer",
+  opacity: disabled ? 0.3 : 1, display: "flex", alignItems: "center", justifyContent: "center",
+});
+
+Object.assign(window, { TeacherTable, ScoreCell });
+</script>
+
+<!-- panel.jsx -->
+<script type="text/babel">
+function TeacherPanel({ teacher, standards, onClose, mode }) {
+  const [students, setStudents] = useState([]);
+  useEffect(() => {
+    if (teacher) setStudents(window.SP_DATA.generateStudents(teacher));
+  }, [teacher]);
+
+  if (!teacher) return null;
+
+  return (
+    <>
+      <div onClick={onClose} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.3)", zIndex: 100 }} />
+      <aside style={{
+        position: "fixed", top: 0, right: 0, bottom: 0, width: 720, maxWidth: "92vw",
+        background: "white", boxShadow: "-12px 0 32px rgba(0,0,0,0.15)", zIndex: 101,
+        display: "flex", flexDirection: "column",
+        animation: "spSlide 0.22s ease-out",
+      }}>
+        <div style={{
+          padding: "20px 24px", borderBottom: `1px solid ${SP_BORDER_LT}`,
+          display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 16,
+        }}>
+          <div>
+            <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_GREY, letterSpacing: 1, textTransform: "uppercase", marginBottom: 4 }}>
+              Teacher detail
+            </div>
+            <div style={{ fontFamily: "Noto Serif, serif", fontWeight: 700, fontSize: 24, color: SP_TEXT }}>{teacher.name}</div>
+            <div style={{ fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_MUTED, marginTop: 4 }}>
+              {teacher.classes} classes · {teacher.students} students · Class avg <b style={{ color: SP_TEXT }}>{teacher.avg}%</b>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: "none", border: "none", cursor: "pointer", padding: 6, borderRadius: 4 }}>
+            <Icons.Close size={20} stroke={SP_TEXT} />
+          </button>
+        </div>
+        <div style={{ padding: "16px 24px", borderBottom: `1px solid ${SP_BORDER_LT}` }}>
+          <div style={{ fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 14, color: SP_TEXT, marginBottom: 10 }}>
+            Performance by standard
+          </div>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {standards.slice(0, 8).map(s => {
+              const sc = teacher.scores[s];
+              return (
+                <div key={s} style={{
+                  padding: "6px 10px", borderRadius: 16, border: `1px solid ${SP_BORDER_LT}`,
+                  display: "flex", alignItems: "center", gap: 6, background: SP_BG,
+                }}>
+                  <span style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_TEXT, fontWeight: 700 }}>{s}</span>
+                  <span style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED }}>{sc ? `${sc.pct}%` : "NA"}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div style={{ flex: 1, overflowY: "auto", padding: "16px 24px" }}>
+          <div style={{ fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 14, color: SP_TEXT, marginBottom: 12 }}>
+            Students ({students.length})
+          </div>
+          <div style={{ border: `1px solid ${SP_BORDER_LT}`, borderRadius: 8, overflow: "hidden", background: "white" }}>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ borderCollapse: "collapse", width: "max-content", minWidth: "100%" }}>
+                <thead>
+                  <tr style={{ background: SP_BG }}>
+                    <th style={hSt}>Student</th>
+                    <th style={hSt}>Avg</th>
+                    {standards.slice(0, 6).map(s => <th key={s} style={hSt}>{s}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {students.map((st, i) => (
+                    <tr key={st.id} style={{ background: i % 2 ? "white" : SP_BG }}>
+                      <td style={cSt}>
+                        <span style={{ fontFamily: "Circular, sans-serif", fontSize: 13, color: SP_LINK, textDecoration: "underline" }}>{st.name}</span>
+                      </td>
+                      <td style={cSt}>
+                        <span style={{ fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 13, color: SP_TEXT }}>{st.avg}%</span>
+                      </td>
+                      {standards.slice(0, 6).map(s => {
+                        const sc = st.scores[s];
+                        return (
+                          <td key={s} style={cSt}>
+                            {sc
+                              ? <span style={{ fontFamily: "Circular, sans-serif", fontSize: 13, color: SP_TEXT }}>{sc.pct}%</span>
+                              : <span style={{ fontFamily: "Circular, sans-serif", fontSize: 13, color: SP_MUTED }}>NA</span>}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </aside>
+    </>
+  );
+}
+
+const hSt = {
+  padding: "10px 14px", textAlign: "left", borderBottom: `1px solid ${SP_BORDER_LT}`,
+  fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 12, color: SP_TEXT, whiteSpace: "nowrap",
+};
+const cSt = {
+  padding: "10px 14px", borderBottom: `1px solid ${SP_BORDER_LT}`,
+  fontFamily: "Circular, sans-serif", fontSize: 13, color: SP_TEXT, whiteSpace: "nowrap",
+};
+
+Object.assign(window, { TeacherPanel });
+</script>
+
+<!-- app.jsx -->
+<script type="text/babel">
+const { useMemo, useState: useS, useEffect: useE } = React;
+
+const TWEAK_DEFAULTS = { "scoreCellMode": "bar", "fontFamily": "Nunito" };
+
+function readTweaks() {
+  try {
+    const raw = localStorage.getItem("sp_tweaks");
+    return raw ? { ...TWEAK_DEFAULTS, ...JSON.parse(raw) } : { ...TWEAK_DEFAULTS };
+  } catch { return { ...TWEAK_DEFAULTS }; }
+}
+
+function App() {
+  const D = window.SP_DATA;
+  const [school, setSchool] = useS(D.SCHOOLS[0]);
+  const [gradeBand, setGradeBand] = useS(D.GRADE_BANDS[0]);
+  const [stdGrade, setStdGrade] = useS(D.STANDARD_GRADES[0]);
+  const [dateRange, setDateRange] = useS(D.DATE_RANGES[0]);
+  const [openSections, setOpenSections] = useS({ high: true, low: true, all: false });
+  const [selectedTeacher, setSelectedTeacher] = useS(null);
+  const [topicGroup, setTopicGroup] = useS("Highest performing topics");
+  const [sortKey, setSortKey] = useS("name");
+  const [sortDir, setSortDir] = useS("asc");
+  const [page, setPage] = useS(0);
+  const [pageSize, setPageSize] = useS(25);
+  const [tweaks, setTweaks] = useS(readTweaks);
+  const [tweaksOpen, setTweaksOpen] = useS(false);
+
+  useE(() => {
+    document.documentElement.style.setProperty("--sp-font", `"${tweaks.fontFamily}"`);
+  }, [tweaks.fontFamily]);
+
+  useE(() => {
+    const handler = (e) => {
+      if (!e.data || typeof e.data !== "object") return;
+      if (e.data.type === "__activate_edit_mode") setTweaksOpen(true);
+      if (e.data.type === "__deactivate_edit_mode") setTweaksOpen(false);
+    };
+    window.addEventListener("message", handler);
+    window.parent.postMessage({ type: "__edit_mode_available" }, "*");
+    return () => window.removeEventListener("message", handler);
+  }, []);
+
+  function updateTweak(k, v) {
+    const next = { ...tweaks, [k]: v };
+    setTweaks(next);
+    try { localStorage.setItem("sp_tweaks", JSON.stringify(next)); } catch {}
+    window.parent.postMessage({ type: "__edit_mode_set_keys", edits: { [k]: v } }, "*");
+  }
+
+  const seedKey = `${school}|${gradeBand}|${stdGrade}|${dateRange}`;
+  const seed = useMemo(() => {
+    let h = 0; for (let i = 0; i < seedKey.length; i++) h = (h * 31 + seedKey.charCodeAt(i)) | 0;
+    return Math.abs(h);
+  }, [seedKey]);
+
+  const adjustedTopics = useMemo(() => {
+    return D.TOPICS.map((t, i) => {
+      const r = ((seed + i * 17) % 1000) / 1000;
+      const delta = Math.round((r - 0.5) * 14);
+      return { ...t, pct: Math.max(8, Math.min(99, t.pct + delta)) };
+    });
+  }, [seed]);
+
+  const adjustedTeachers = useMemo(() => {
+    return D.TEACHERS.map((t, i) => {
+      const r = ((seed + i * 11) % 1000) / 1000;
+      const delta = Math.round((r - 0.5) * 12);
+      const newScores = {};
+      Object.entries(t.scores).forEach(([k, v]) => {
+        if (v) newScores[k] = { ...v, pct: Math.max(8, Math.min(99, v.pct + delta)) };
+        else newScores[k] = v;
+      });
+      const valid = Object.values(newScores).filter(s => s);
+      const avg = Math.round(valid.reduce((a, b) => a + b.pct, 0) / valid.length);
+      return { ...t, scores: newScores, avg };
+    });
+  }, [seed]);
+
+  const sortedByPct = [...adjustedTopics].sort((a, b) => b.pct - a.pct);
+
+  const gradeBandFilter = useMemo(() => {
+    if (gradeBand.startsWith("All")) return null;
+    if (gradeBand.startsWith("Elementary")) return "Elementary";
+    if (gradeBand.startsWith("Middle")) return "Middle School";
+    if (gradeBand.startsWith("High")) return "High School";
+    return null;
+  }, [gradeBand]);
+
+  const filteredTopics = useMemo(() => {
+    if (!gradeBandFilter) return sortedByPct;
+    return sortedByPct.filter(t => t.gradeBand === gradeBandFilter);
+  }, [sortedByPct, gradeBandFilter]);
+
+  const highest = filteredTopics.slice(0, 4);
+  const lowest = filteredTopics.slice(-4).reverse();
+
+  const sortedTeachers = useMemo(() => {
+    const arr = [...adjustedTeachers];
+    arr.sort((a, b) => {
+      let av, bv;
+      if (sortKey === "name") { av = a.name; bv = b.name; }
+      else if (sortKey === "avg") { av = a.avg; bv = b.avg; }
+      else { av = a.scores[sortKey]?.pct ?? -1; bv = b.scores[sortKey]?.pct ?? -1; }
+      if (av < bv) return sortDir === "asc" ? -1 : 1;
+      if (av > bv) return sortDir === "asc" ? 1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [adjustedTeachers, sortKey, sortDir]);
+
+  function handleSort(k) {
+    if (sortKey === k) setSortDir(d => d === "asc" ? "desc" : "asc");
+    else { setSortKey(k); setSortDir(k === "name" ? "asc" : "desc"); }
+    setPage(0);
+  }
+
+  const tableStandards = useMemo(() => {
+    const all = D.STANDARDS;
+    if (topicGroup === "Highest performing topics") return all.slice(16, 25);
+    if (topicGroup === "Lowest performing topics") return all.slice(0, 9);
+    return all.slice(0, 12);
+  }, [topicGroup]);
+
+  return (
+    <div style={{ minHeight: "100vh", background: "white", display: "flex", flexDirection: "column" }}>
+      <TopNav />
+      <div style={{ display: "flex", flex: 1 }}>
+        <Sidebar />
+        <main style={{ flex: 1, padding: "24px 40px 80px 40px", minWidth: 0 }}>
+          <Breadcrumb />
+
+          <h1 style={{
+            fontFamily: "'Noto Serif', serif", fontWeight: 700, fontSize: 32,
+            color: SP_TEXT, margin: "0 0 24px 0",
+          }}>Standards performance</h1>
+
+          <div style={{ display: "grid", gridTemplateColumns: "minmax(280px, 2fr) 1fr 1fr 1fr", gap: 16, marginBottom: 32 }}>
+            <ComboBox label="Select School" value={school} options={D.SCHOOLS} onChange={setSchool} />
+            <ComboBox label="Grade Bands" value={gradeBand} options={D.GRADE_BANDS} onChange={setGradeBand} />
+            <ComboBox label="Standard Grade Level" value={stdGrade} options={D.STANDARD_GRADES} onChange={setStdGrade} />
+            <ComboBox label="Date Range" value={dateRange} options={D.DATE_RANGES} onChange={setDateRange} />
+          </div>
+
+          <section style={{ marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+              <h2 style={h2}>Reading Comprehension Performance by Topic</h2>
+              <button style={dlBtn}><Icons.Download size={16} stroke={SP_LINK} /> Download as .csv</button>
+            </div>
+            <p style={pSt}>
+              See school performance by broader standards topics. Topics group related standards to give you
+              a clear view of overall coverage and mastery. Percentages show the average quiz score on
+              standards within the topic, so you can quickly spot strengths and learning gaps.
+            </p>
+          </section>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 32 }}>
+            <CollapsiblePanel title="Highest Performing Topics" controlled isOpen={openSections.high}
+              onToggle={() => setOpenSections(s => ({ ...s, high: !s.high }))}>
+              <TopicGrid topics={highest} />
+            </CollapsiblePanel>
+            <CollapsiblePanel title="Lowest Performing Topics" controlled isOpen={openSections.low}
+              onToggle={() => setOpenSections(s => ({ ...s, low: !s.low }))}>
+              <TopicGrid topics={lowest} />
+            </CollapsiblePanel>
+            <CollapsiblePanel title={`Performance on all ${filteredTopics.length} Topics`} controlled isOpen={openSections.all}
+              onToggle={() => setOpenSections(s => ({ ...s, all: !s.all }))}>
+              <AllTopicsList topics={filteredTopics} />
+            </CollapsiblePanel>
+          </div>
+
+          <section style={{ marginBottom: 16 }}>
+            <h2 style={h2}>Reading Comprehension Standards by Teacher</h2>
+            <p style={pSt}>
+              Explore how each teacher is performing on specific standards. Use this section to pinpoint
+              which standards students have mastered and where they may need additional support.
+            </p>
+          </section>
+
+          <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
+            <div style={{ position: "relative", display: "inline-block" }}>
+              <select value={topicGroup} onChange={e => { setTopicGroup(e.target.value); setPage(0); }}
+                style={{
+                  appearance: "none", padding: "12px 40px 12px 16px",
+                  border: `1px solid ${SP_BORDER}`, borderRadius: 4, background: "white",
+                  fontFamily: "Circular, sans-serif", fontSize: 14, fontWeight: 700, color: SP_TEXT,
+                  cursor: "pointer", minWidth: 270,
+                }}>
+                <option>Highest performing topics</option>
+                <option>Lowest performing topics</option>
+                <option>All standards</option>
+              </select>
+              <Icons.ChevronDown size={16} stroke={SP_TEXT}
+                style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+            </div>
+            <span style={{ fontFamily: "Circular, sans-serif", fontSize: 13, color: SP_MUTED }}>
+              Click any teacher row to see student detail
+            </span>
+          </div>
+
+          <TeacherTable
+            teachers={sortedTeachers}
+            standards={tableStandards}
+            mode={tweaks.scoreCellMode}
+            sortKey={sortKey}
+            sortDir={sortDir}
+            onSort={handleSort}
+            onRowClick={t => setSelectedTeacher(t)}
+            page={page}
+            pageSize={pageSize}
+            onPageChange={(p, s) => { setPage(p); setPageSize(s); }}
+            totalRows={sortedTeachers.length}
+            selectedTeacherId={selectedTeacher?.id}
+          />
+        </main>
+      </div>
+
+      <TeacherPanel teacher={selectedTeacher} standards={D.STANDARDS}
+        onClose={() => setSelectedTeacher(null)} mode={tweaks.scoreCellMode} />
+
+      {tweaksOpen && (
+        <div style={{
+          position: "fixed", bottom: 24, right: 24, width: 280, background: "white",
+          borderRadius: 12, boxShadow: "0 12px 32px rgba(0,0,0,0.18)", border: `1px solid ${SP_BORDER}`,
+          padding: 16, zIndex: 200,
+        }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <span style={{ fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 16, color: SP_TEXT }}>Tweaks</span>
+            <button onClick={() => setTweaksOpen(false)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+              <Icons.Close size={16} stroke={SP_TEXT} />
+            </button>
+          </div>
+          <div style={{ fontFamily: "inherit", fontSize: 12, color: SP_MUTED, marginBottom: 6 }}>Score cell style</div>
+          <div style={{ display: "flex", gap: 6 }}>
+            {["bar", "circle"].map(m => (
+              <button key={m} onClick={() => updateTweak("scoreCellMode", m)}
+                style={{
+                  flex: 1, padding: "8px 10px", borderRadius: 6, cursor: "pointer",
+                  border: `1px solid ${tweaks.scoreCellMode === m ? SP_LINK : SP_BORDER}`,
+                  background: tweaks.scoreCellMode === m ? "rgb(231,241,255)" : "white",
+                  fontFamily: "inherit", fontSize: 13, fontWeight: 700, color: SP_TEXT, textTransform: "capitalize",
+                }}>{m === "bar" ? "Bar chart" : "Percent circle"}</button>
+            ))}
+          </div>
+          <div style={{ fontFamily: "inherit", fontSize: 12, color: SP_MUTED, marginTop: 14, marginBottom: 6 }}>
+            Font (Circular substitute)
+          </div>
+          <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            {["Nunito", "Mulish", "Inter"].map(f => (
+              <button key={f} onClick={() => updateTweak("fontFamily", f)}
+                style={{
+                  flex: 1, padding: "8px 10px", borderRadius: 6, cursor: "pointer",
+                  border: `1px solid ${tweaks.fontFamily === f ? SP_LINK : SP_BORDER}`,
+                  background: tweaks.fontFamily === f ? "rgb(231,241,255)" : "white",
+                  fontFamily: `"${f}", sans-serif`, fontSize: 13, fontWeight: 700, color: SP_TEXT,
+                }}>{f}</button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const h2 = { fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 24, color: SP_TEXT, margin: "0 0 8px 0" };
+const pSt = { fontFamily: "Circular, sans-serif", fontSize: 16, lineHeight: 1.6, color: "rgb(66,65,71)", margin: "0 0 24px 0", maxWidth: 1100 };
+const dlBtn = { display: "flex", alignItems: "center", gap: 8, background: "none", border: "none", cursor: "pointer", color: SP_LINK, fontFamily: "Circular, sans-serif", fontSize: 14, fontWeight: 700 };
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+</body>
+</html>
