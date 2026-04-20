@@ -72,8 +72,14 @@ function TopicGrid({ topics }) {
   );
 }
 
+function gbShort(gb) {
+  if (gb === "High School") return "HS";
+  if (gb === "Middle School") return "MS";
+  if (gb === "Elementary") return "Elementary";
+  return "";
+}
+
 function AllTopicsList({ topics }) {
-  // a denser grid since there are many
   return (
     <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8 }}>
       {topics.map(t => (
@@ -87,11 +93,16 @@ function AllTopicsList({ topics }) {
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
             }}>{t.name}</div>
             <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED }}>
-              {t.questions} questions · Newsela avg {t.newselaAvg}%
+              {gbShort(t.gradeBand)}{t.gradeBand ? " · " : ""}Based on {t.questions} questions
             </div>
           </div>
-          <div style={{ width: 120, height: 8, background: SP_BORDER_LT, borderRadius: 4, overflow: "hidden", flexShrink: 0 }}>
-            <div style={{ width: `${t.pct}%`, height: "100%", background: SP_CYAN, borderRadius: 4 }} />
+          <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "stretch", flexShrink: 0, width: 120 }}>
+            <div style={{ height: 8, background: SP_BORDER_LT, borderRadius: 4, overflow: "hidden" }}>
+              <div style={{ width: `${t.pct}%`, height: "100%", background: SP_CYAN, borderRadius: 4 }} />
+            </div>
+            <div style={{ fontFamily: "Circular, sans-serif", fontSize: 11, color: SP_MUTED, textAlign: "right" }}>
+              Newsela avg {t.newselaAvg}%
+            </div>
           </div>
           <div style={{
             fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 14, color: SP_TEXT,
