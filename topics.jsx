@@ -95,7 +95,7 @@ function AllTopicsList({ topics }) {
                 <div style={{ width: `${t.pct}%`, height: "100%", background: SP_CYAN, borderRadius: 4 }} />
               </div>
             </div>
-            <div style={{ fontFamily: "Circular, sans-serif", fontSize: 11, color: SP_MUTED, textAlign: "right" }}>
+            <div style={{ fontFamily: "Circular, sans-serif", fontSize: 11, color: SP_MUTED, textAlign: "left" }}>
               Based on {t.questions} questions
             </div>
           </div>
