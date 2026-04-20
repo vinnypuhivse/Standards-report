@@ -76,7 +76,6 @@ function Sidebar() {
         <SidebarLink label="Usage report" />
         <SidebarLink label="Standards performance" active />
         <SidebarLink label="Power words" />
-        <SidebarLink label="Power words by class" indent />
       </div>
     </aside>
   );
