@@ -107,8 +107,7 @@ function TeacherTable({ teachers, standards, mode, sortKey, sortDir, onSort, onR
                     boxShadow: "2px 0 0 0 rgba(0,0,0,0.04)",
                   }}>
                     <span style={{
-                      fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_LINK,
-                      textDecoration: "underline",
+                      fontFamily: "Circular, sans-serif", fontSize: 14, color: SP_TEXT,
                     }}>{t.name}</span>
                     <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED, marginTop: 2 }}>
                       {t.classes} classes · {t.students} students
