@@ -23,7 +23,8 @@ function App() {
 
   const [openSections, setOpenSections] = useS({ high: true, low: true, all: false });
   const [selectedTeacher, setSelectedTeacher] = useS(null);
-  const [topicGroup, setTopicGroup] = useS("Highest performing topics");
+  const [selectedPerf, setSelectedPerf] = useS(["Highest performing topics"]);
+  const [selectedTopics, setSelectedTopics] = useS([]);
   const [sortKey, setSortKey] = useS("name");
   const [sortDir, setSortDir] = useS("asc");
   const [page, setPage] = useS(0);
@@ -125,13 +126,29 @@ function App() {
     setPage(0);
   }
 
-  // table standards: based on group selection
+  const topicOptions = useMemo(() =>
+    D.TOPICS.map(t => t.gradeBand ? `${t.name} (${t.gradeBand})` : t.name), []);
+
   const tableStandards = useMemo(() => {
     const all = D.STANDARDS;
-    if (topicGroup === "Highest performing topics") return all.slice(16, 25);
-    if (topicGroup === "Lowest performing topics") return all.slice(0, 9);
+    if (selectedTopics.length > 0) {
+      const stdSet = new Set();
+      selectedTopics.forEach(label => {
+        const idx = D.TOPICS.findIndex(t =>
+          (t.gradeBand ? `${t.name} (${t.gradeBand})` : t.name) === label
+        );
+        if (idx >= 0) {
+          for (let i = 0; i < 3; i++) stdSet.add(all[(idx * 2 + i) % all.length]);
+        }
+      });
+      return all.filter(s => stdSet.has(s)).slice(0, 12);
+    }
+    const highSel = selectedPerf.includes("Highest performing topics");
+    const lowSel = selectedPerf.includes("Lowest performing topics");
+    if (highSel && !lowSel) return all.slice(16, 25);
+    if (lowSel && !highSel) return all.slice(0, 9);
     return all.slice(0, 12);
-  }, [topicGroup]);
+  }, [selectedPerf, selectedTopics]);
 
   return (
     <div style={{ minHeight: "100vh", background: "white", display: "flex", flexDirection: "column" }}>
@@ -191,22 +208,22 @@ function App() {
             </p>
           </section>
 
-          <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 12 }}>
-            <div style={{ position: "relative", display: "inline-block" }}>
-              <select value={topicGroup} onChange={e => { setTopicGroup(e.target.value); setPage(0); }}
-                style={{
-                  appearance: "none", padding: "12px 40px 12px 16px",
-                  border: `1px solid ${SP_BORDER}`, borderRadius: 4, background: "white",
-                  fontFamily: "Circular, sans-serif", fontSize: 14, fontWeight: 700, color: SP_TEXT,
-                  cursor: "pointer", minWidth: 270,
-                }}>
-                <option>Highest performing topics</option>
-                <option>Lowest performing topics</option>
-                <option>All standards</option>
-              </select>
-              <Icons.ChevronDown size={16} stroke={SP_TEXT}
-                style={{ position: "absolute", right: 14, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
-            </div>
+          <div style={{ marginBottom: 16, display: "flex", alignItems: "center", gap: 12, flexWrap: "wrap" }}>
+            <MultiSelectDropdown
+              placeholder="Highest performing topics"
+              options={["Highest performing topics", "Lowest performing topics"]}
+              applied={selectedPerf}
+              onApply={(v) => { setSelectedPerf(v); setPage(0); }}
+              overrideLabel={selectedTopics.length > 0 ? "Select by performance" : null}
+              width={270}
+            />
+            <MultiSelectDropdown
+              placeholder="Select topics"
+              options={topicOptions}
+              applied={selectedTopics}
+              onApply={(v) => { setSelectedTopics(v); setPage(0); }}
+              width={240}
+            />
             <span style={{ fontFamily: "Circular, sans-serif", fontSize: 13, color: SP_MUTED }}>
               Click any teacher row to see student detail
             </span>
