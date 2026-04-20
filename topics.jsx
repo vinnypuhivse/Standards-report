@@ -78,9 +78,9 @@ function AllTopicsList({ topics }) {
       {topics.map(t => (
         <div key={t.id} style={{
           background: "white", borderRadius: 8, padding: "10px 14px",
-          display: "flex", alignItems: "center", gap: 16,
+          display: "flex", alignItems: "stretch", gap: 16,
         }}>
-          <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
             <div style={{
               fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 14, color: SP_TEXT,
               overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
@@ -89,9 +89,11 @@ function AllTopicsList({ topics }) {
               {t.gradeBand ? `${t.gradeBand} · ` : ""}Newsela avg {t.newselaAvg}%
             </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 3, alignItems: "stretch", flexShrink: 0, width: 120 }}>
-            <div style={{ height: 8, background: SP_BORDER_LT, borderRadius: 4, overflow: "hidden" }}>
-              <div style={{ width: `${t.pct}%`, height: "100%", background: SP_CYAN, borderRadius: 4 }} />
+          <div style={{ flexShrink: 0, width: 120, display: "flex", flexDirection: "column", justifyContent: "space-between" }}>
+            <div style={{ flex: 1, display: "flex", alignItems: "center" }}>
+              <div style={{ width: "100%", height: 8, background: SP_BORDER_LT, borderRadius: 4, overflow: "hidden" }}>
+                <div style={{ width: `${t.pct}%`, height: "100%", background: SP_CYAN, borderRadius: 4 }} />
+              </div>
             </div>
             <div style={{ fontFamily: "Circular, sans-serif", fontSize: 11, color: SP_MUTED, textAlign: "right" }}>
               Based on {t.questions} questions
@@ -99,7 +101,7 @@ function AllTopicsList({ topics }) {
           </div>
           <div style={{
             fontFamily: "Circular, sans-serif", fontWeight: 700, fontSize: 14, color: SP_TEXT,
-            width: 38, textAlign: "right",
+            width: 38, textAlign: "right", display: "flex", alignItems: "center",
           }}>{t.pct}%</div>
         </div>
       ))}
