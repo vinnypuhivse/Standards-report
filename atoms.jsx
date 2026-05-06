@@ -10,7 +10,7 @@ const SP_BG = "rgb(248,248,248)";
 const SP_PANEL = "rgb(240,241,242)";
 const SP_BORDER = "rgb(221,221,221)";
 const SP_BORDER_LT = "rgb(225,227,229)";
-const SP_CYAN = "rgb(100,212,243)";
+const SP_CYAN = "#31AFCB";
 const SP_NAV_TEXT = "rgb(84,84,84)";
 
 const Icon = ({ d, size = 16, stroke = "currentColor", strokeWidth = 1.5, fill = "none", style = {}, viewBox = "0 0 24 24" }) => (
