@@ -28,7 +28,7 @@ function ScoreCell({ score, mode }) {
       <div style={{ fontFamily: "Circular, sans-serif", fontSize: 16, color: SP_TEXT }}>
         {score.pct}%
       </div>
-      <div style={{ height: 8, borderRadius: 4, background: SP_BORDER_LT, overflow: "hidden" }}>
+      <div style={{ height: 8, borderRadius: 4, background: "white", border: `1px solid ${SP_CYAN}`, overflow: "hidden" }}>
         <div style={{ width: `${score.pct}%`, height: "100%", background: SP_CYAN, borderRadius: 4 }} />
       </div>
       <div style={{ fontFamily: "Circular, sans-serif", fontSize: 12, color: SP_MUTED }}>
